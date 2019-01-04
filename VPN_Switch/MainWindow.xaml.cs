@@ -26,8 +26,9 @@ namespace VPN_Switch
         public MainWindow()
         {
             InitializeComponent();
+
             NotifyIcon ni = new NotifyIcon();
-            ni.Icon = new Icon("appIcon.ico");
+            ni.Icon = new Icon("shield.ico");
             ni.Visible = true;
             ni.DoubleClick +=
                 delegate (object sender, EventArgs args)
