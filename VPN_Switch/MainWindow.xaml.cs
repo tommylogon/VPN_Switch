@@ -22,6 +22,7 @@ using System.Net.Sockets;
 using DotRas;
 using System.Net.NetworkInformation;
 using MessageBox = System.Windows.MessageBox;
+using MenuItem = System.Windows.Controls.MenuItem;
 
 namespace VPN_Switch
 {
@@ -97,6 +98,10 @@ namespace VPN_Switch
             this.Hide();
 
             base.OnClosing(e);
+        }
+
+        private void VPN_Entry_Clicked(object sender, RoutedEventArgs e)
+        {
         }
 
         private void Connect_Clicked(object sender, RoutedEventArgs e)
