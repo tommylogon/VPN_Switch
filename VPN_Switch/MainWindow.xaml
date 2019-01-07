@@ -23,12 +23,13 @@
         <Button x:Name="button" Content="Connect" HorizontalAlignment="Left" Margin="401,133,0,0" VerticalAlignment="Top" Width="75" Click="Connect_Clicked" />
         <TextBox x:Name="txt_username" HorizontalAlignment="Left" Height="23" Margin="157,105,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="239" />
         <TextBox x:Name="txt_password" HorizontalAlignment="Left" Height="23" Margin="157,133,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="239" />
-        <TextBox x:Name="textBox_Copy1" HorizontalAlignment="Left" Height="23" Margin="157,77,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="239" />
+        <TextBox x:Name="textBox_Copy1" HorizontalAlignment="Left" Height="23" Margin="157,77,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="239" />
         <Label x:Name="label" Content="Adress" HorizontalAlignment="Left" Margin="92,73,0,0" VerticalAlignment="Top" />
         <Label x:Name="label_Copy" Content="Username" HorizontalAlignment="Left" Margin="92,101,0,0" VerticalAlignment="Top" />
         <Label x:Name="label_Copy1" Content="Password" HorizontalAlignment="Left" Margin="92,127,0,0" VerticalAlignment="Top" />
-        <Label x:Name="lbl_CurrentIP" Content="Label" HorizontalAlignment="Left" Margin="122,241,0,0" VerticalAlignment="Top" />
+        <Label x:Name="lbl_CurrentIP" Content="Current IP: 10.0.0.1" HorizontalAlignment="Left" Margin="122,241,0,0" VerticalAlignment="Top" />
         <Button x:Name="button1" Content="Disconnect" HorizontalAlignment="Left" Margin="401,158,0,0" VerticalAlignment="Top" Width="75" Click="Disconnect_clicked" />
         <Button x:Name="button2" Content="Close and exit" HorizontalAlignment="Left" Margin="499,10,0,0" VerticalAlignment="Top" Width="83" Click="Exit_Clicked" />
+        <Label x:Name="lbl_ConnectionStatus" Content="Connected/ Disconnected" HorizontalAlignment="Left" Margin="122,223,0,0" VerticalAlignment="Top" />
     </Grid>
 </Window>

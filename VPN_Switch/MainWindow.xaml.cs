@@ -23,6 +23,7 @@ using DotRas;
 using System.Net.NetworkInformation;
 using MessageBox = System.Windows.MessageBox;
 using MenuItem = System.Windows.Controls.MenuItem;
+using System.Threading;
 
 namespace VPN_Switch
 {
@@ -32,11 +33,14 @@ namespace VPN_Switch
     public partial class MainWindow : Window
     {
         public bool isConnected = false;
+        private Process rasdial = new Process();
+        public NetworkInterface netinterface;
 
         public MainWindow()
         {
             InitializeComponent();
 
+            rasdial.StartInfo.FileName = "rasdial.exe";
             lbl_CurrentIP.Content = "Current ip is: " + GetLocalIPAddress();
 
             ReadPhonebook();
@@ -53,14 +57,13 @@ namespace VPN_Switch
                     {
                         if ((Interface.NetworkInterfaceType == NetworkInterfaceType.Ppp) && (Interface.NetworkInterfaceType != NetworkInterfaceType.Loopback))
                         {
-                            IPv4InterfaceStatistics statistics = Interface.GetIPv4Statistics();
-                            MessageBox.Show(Interface.Name + " " + Interface.NetworkInterfaceType.ToString() + " " + Interface.Description);
+                            netinterface = Interface;
                             return true;
                         }
                     }
                 }
-                //MessageBox.Show("VPN Connection is lost!");
             }
+            netinterface = null;
             return false;
         }
 
@@ -71,13 +74,31 @@ namespace VPN_Switch
 
         private void OpenConnection()
         {
-            Process.Start(@"rasdial.exe", "hhm-vpn " + txt_username.Text + " " + txt_password.Text);
-            lbl_CurrentIP.Content = "Current ip is: " + GetLocalIPAddress();
+            rasdial.StartInfo.Arguments = "hhm-vpn " + txt_username.Text + " " + txt_password.Text;
+            rasdial.Start();
+            rasdial.WaitForExit();
+
+            if (CheckConnection())
+            {
+                lbl_ConnectionStatus.Content = "Your are connected to " + netinterface.Name;
+                lbl_CurrentIP.Content = "Current ip is: " + GetLocalIPAddress();
+            }
+            else
+            {
+                lbl_ConnectionStatus.Content = "You are disconnected";
+            }
         }
 
         private void CloseConnection()
         {
-            Process.Start(@"rasdial.exe", "hhm-vpn /d");
+            rasdial.StartInfo.Arguments = "hhm-vpn /d";
+            rasdial.Start();
+            rasdial.WaitForExit();
+
+            if (!CheckConnection())
+            {
+                lbl_ConnectionStatus.Content = "You are disconnected";
+            }
         }
 
         // minimize to system tray when applicaiton is minimized
@@ -114,6 +135,10 @@ namespace VPN_Switch
             else
             {
                 OpenConnection();
+                if (!CheckConnection())
+                {
+                    MessageBox.Show("Connection Failed,\n Please check Username and/or Password", "Error");
+                }
             }
         }
 
@@ -127,7 +152,7 @@ namespace VPN_Switch
 
             foreach (RasEntry entry in pbk.Entries)
             {
-                System.Windows.Controls.MenuItem item = new System.Windows.Controls.MenuItem();
+                MenuItem item = new MenuItem();
                 item.Click += Connect_Clicked;
                 item.Header = entry.Name;
                 TbI.ContextMenu.Items.Add(item);
@@ -137,6 +162,7 @@ namespace VPN_Switch
         private static string GetLocalIPAddress()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
+
             foreach (var ip in host.AddressList)
             {
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
