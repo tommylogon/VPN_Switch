@@ -1,29 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Forms;
-using System.Drawing;
-using Hardcodet.Wpf.TaskbarNotification;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using DotRas;
 using System.Net.NetworkInformation;
-using MessageBox = System.Windows.MessageBox;
 using MenuItem = System.Windows.Controls.MenuItem;
-using System.Threading;
+using System.Windows.Media.Imaging;
 
 namespace VPN_Switch
 {
@@ -41,7 +26,8 @@ namespace VPN_Switch
             InitializeComponent();
 
             rasdial.StartInfo.FileName = "rasdial.exe";
-            lbl_CurrentIP.Content = "Current ip is: " + GetLocalIPAddress();
+            CheckConnection();
+            lbl_CurrentIP.Content = GetLocalIPAddress();
 
             ReadPhonebook();
         }
@@ -51,6 +37,7 @@ namespace VPN_Switch
             if (NetworkInterface.GetIsNetworkAvailable())
             {
                 NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
+
                 foreach (NetworkInterface Interface in interfaces)
                 {
                     if (Interface.OperationalStatus == OperationalStatus.Up)
@@ -58,12 +45,16 @@ namespace VPN_Switch
                         if ((Interface.NetworkInterfaceType == NetworkInterfaceType.Ppp) && (Interface.NetworkInterfaceType != NetworkInterfaceType.Loopback))
                         {
                             netinterface = Interface;
+                            lbl_ConnectionStatus.Content = "Your are connected to " + netinterface.Name;
+                            lbl_CurrentIP.Content = GetLocalIPAddress();
                             return true;
                         }
                     }
                 }
             }
             netinterface = null;
+            lbl_ConnectionStatus.Content = "You are disconnected";
+            lbl_CurrentIP.Content = GetLocalIPAddress();
             return false;
         }
 
@@ -74,31 +65,19 @@ namespace VPN_Switch
 
         private void OpenConnection()
         {
-            rasdial.StartInfo.Arguments = "hhm-vpn " + txt_username.Text + " " + txt_password.Text;
+            rasdial.StartInfo.Arguments = txt_VPN_Name.Text + " " + txt_username.Text + " " + txt_password.Text;
             rasdial.Start();
             rasdial.WaitForExit();
-
-            if (CheckConnection())
-            {
-                lbl_ConnectionStatus.Content = "Your are connected to " + netinterface.Name;
-                lbl_CurrentIP.Content = "Current ip is: " + GetLocalIPAddress();
-            }
-            else
-            {
-                lbl_ConnectionStatus.Content = "You are disconnected";
-            }
+            CheckConnection();
         }
 
         private void CloseConnection()
         {
-            rasdial.StartInfo.Arguments = "hhm-vpn /d";
+            rasdial.StartInfo.Arguments = txt_VPN_Name.Text + " /d";
             rasdial.Start();
             rasdial.WaitForExit();
 
-            if (!CheckConnection())
-            {
-                lbl_ConnectionStatus.Content = "You are disconnected";
-            }
+            CheckConnection();
         }
 
         // minimize to system tray when applicaiton is minimized
@@ -121,8 +100,23 @@ namespace VPN_Switch
             base.OnClosing(e);
         }
 
-        private void VPN_Entry_Clicked(object sender, RoutedEventArgs e)
+        private void Change_Tray_Entry_Icon(MenuItem item)
         {
+            try
+            {
+                if (CheckConnection())
+                {
+                    SetIcon(item, "ok.png");
+                }
+                else
+                {
+                    SetIcon(item, "nok.png");
+                    //MessageBox.Show("Connection Failed,\n Please check Username and/or Password", "Error");
+                }
+            }
+            catch (Exception ex)
+            {
+            }
         }
 
         private void Connect_Clicked(object sender, RoutedEventArgs e)
@@ -135,11 +129,26 @@ namespace VPN_Switch
             else
             {
                 OpenConnection();
-                if (!CheckConnection())
-                {
-                    MessageBox.Show("Connection Failed,\n Please check Username and/or Password", "Error");
-                }
             }
+            if (sender is MenuItem item)
+            {
+                Change_Tray_Entry_Icon(item);
+            }
+        }
+
+        private void SetIcon(MenuItem item, string iconName)
+        {
+            // Create Image and set its width and height
+            Image image = new Image();
+
+            // Create a BitmapSource
+            BitmapImage bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(Environment.CurrentDirectory + @"\" + iconName);
+            bitmap.EndInit();
+            // Set Image.Source
+            image.Source = bitmap;
+            item.Icon = image;
         }
 
         private void ReadPhonebook()
@@ -156,21 +165,29 @@ namespace VPN_Switch
                 item.Click += Connect_Clicked;
                 item.Header = entry.Name;
                 TbI.ContextMenu.Items.Add(item);
+                lib_VPNListBox.Items.Add(item.Header);
             }
         }
 
         private static string GetLocalIPAddress()
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-
+            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+            string message = "";
             foreach (var ip in host.AddressList)
             {
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    return ip.ToString();
+                    message += ip.ToString() + "\n";
                 }
             }
-            throw new Exception("No network adapters with an IPv4 address in the system!");
+            if (!string.IsNullOrEmpty(message))
+            {
+                return message;
+            }
+            else
+            {
+                throw new Exception("No network adapters with an IPv4 address in the system!");
+            }
         }
 
         private void Disconnect_clicked(object sender, RoutedEventArgs e)
@@ -181,6 +198,17 @@ namespace VPN_Switch
         private void Exit_Clicked(object sender, RoutedEventArgs e)
         {
             System.Windows.Application.Current.Shutdown();
+        }
+
+        private void VPN_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                txt_VPN_Name.Text = e.AddedItems[0].ToString();
+            }
+            catch (Exception ex)
+            {
+            }
         }
     }
 }
