@@ -17,26 +17,25 @@
                     Background="White">
                     <MenuItem Header="Open Window" Click="ShowWindow_Clicked">
                         <MenuItem.Icon>
-                            <Image Source="C:\Users\Tommy\source\repos\VPN_Switch\VPN_Switch\no-internet.png"></Image>
+                            <Image></Image>
                         </MenuItem.Icon>
                     </MenuItem>
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
-
-        <Button x:Name="button" Content="Connect" HorizontalAlignment="Left" Margin="348,77,0,0" VerticalAlignment="Top" Width="75" Click="Connect_Clicked" />
-        <TextBox x:Name="txt_username" HorizontalAlignment="Left" Height="23" Margin="183,74,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="151" />
-        <TextBox x:Name="txt_password" HorizontalAlignment="Left" Height="23" Margin="183,102,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="151" />
-        <TextBox x:Name="txt_VPN_Name" HorizontalAlignment="Left" Height="23" Margin="183,46,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="151" />
-        <Label x:Name="label" Content="Adress" HorizontalAlignment="Left" Margin="119,42,0,0" VerticalAlignment="Top" Width="44" />
-        <Label x:Name="label_Copy" Content="Username" HorizontalAlignment="Left" Margin="119,70,0,0" VerticalAlignment="Top" Width="62" />
-        <Label x:Name="label_Copy1" Content="Password" HorizontalAlignment="Left" Margin="119,96,0,0" VerticalAlignment="Top" Width="59" />
         <Label Content="Current IP: " HorizontalAlignment="Left" Margin="122,241,0,0" VerticalAlignment="Top" />
-        <Button x:Name="button1" Content="Disconnect" HorizontalAlignment="Left" Margin="348,102,0,0" VerticalAlignment="Top" Width="75" Click="Disconnect_clicked" />
         <Button x:Name="button2" Content="Close and exit" HorizontalAlignment="Left" Margin="499,10,0,0" VerticalAlignment="Top" Width="83" Click="Exit_Clicked" />
         <Label x:Name="lbl_ConnectionStatus" Content="Connected/ Disconnected" HorizontalAlignment="Left" Margin="122,223,0,0" VerticalAlignment="Top" />
-        <ListBox x:Name="lib_VPNListBox" HorizontalAlignment="Left" Height="100" Margin="10,28,0,0" VerticalAlignment="Top" Width="100" SelectionChanged="VPN_Changed" />
         <Label x:Name="lbl_CurrentIP" Content="10.0.0.1" HorizontalAlignment="Left" Margin="196,241,0,0" VerticalAlignment="Top" />
-        <Image x:Name="image_holder" HorizontalAlignment="Left" Height="100" Margin="407,189,0,0" VerticalAlignment="Top" Width="100" />
+        <StackPanel x:Name="stkpnl_Container" HorizontalAlignment="Left" Height="170" Margin="93,28,0,0" VerticalAlignment="Top" Width="278" RenderTransformOrigin="0.5,0.5">
+            <StackPanel.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform />
+                    <SkewTransform />
+                    <RotateTransform Angle="0.154" />
+                    <TranslateTransform />
+                </TransformGroup>
+            </StackPanel.RenderTransform>
+        </StackPanel>
     </Grid>
 </Window>
