@@ -40,7 +40,7 @@ namespace VPN_Switch
 
             UpdateGUI_Icons();
 
-            TbI.DoubleClickCommand = ShowWindow_Clicked;
+            //TbI.DoubleClickCommand = ShowWindow_Clicked;
 
             StartBackgroundChecker();
         }
