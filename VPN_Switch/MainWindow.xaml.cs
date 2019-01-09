@@ -10,6 +10,8 @@ using System.Net.NetworkInformation;
 using MenuItem = System.Windows.Controls.MenuItem;
 using System.Windows.Media.Imaging;
 using System.Threading;
+using System.Collections.Generic;
+using System.Windows.Media;
 
 namespace VPN_Switch
 {
@@ -25,11 +27,21 @@ namespace VPN_Switch
         public MainWindow()
         {
             InitializeComponent();
+
             SetupRasDial();
+
             VPN_Controller.CheckConnection();
+
             lbl_CurrentIP.Content = VPN_Controller.GetLocalIPAddress();
+
             lbl_ConnectionStatus.Content = VPN_Controller.ConnectionStatus;
+
             ReadPhonebook();
+
+            UpdateGUI_Icons();
+
+            TbI.DoubleClickCommand = ShowWindow_Clicked;
+
             StartBackgroundChecker();
         }
 
@@ -59,6 +71,7 @@ namespace VPN_Switch
             rasdial.StartInfo.RedirectStandardError = true;
             rasdial.StartInfo.RedirectStandardOutput = true;
             rasdial.StartInfo.UseShellExecute = false;
+            rasdial.StartInfo.CreateNoWindow = true;
         }
 
         //ROW TEST
@@ -70,7 +83,7 @@ namespace VPN_Switch
 
             Image img = new Image
             {
-                Width = 15
+                Width = 25
             };
             img.Margin = new Thickness(2, 2, 2, 2);
             img.Source = bitmap;
@@ -79,6 +92,7 @@ namespace VPN_Switch
             {
                 Content = vpnName
             };
+            btn.FontSize = 15;
             btn.Margin = new Thickness(2, 2, 2, 2);
             btn.Click += Connect_Clicked;
 
@@ -87,6 +101,7 @@ namespace VPN_Switch
                 Content = "RDP"
             };
             //rdp.Click += ConnectRDP;
+            rdp.Background = Brushes.Red;
             rdp.Margin = new Thickness(2, 2, 2, 2);
             wp.Children.Add(img);
             wp.Children.Add(btn);
@@ -217,7 +232,38 @@ namespace VPN_Switch
 
         private void Exit_Clicked(object sender, RoutedEventArgs e)
         {
-            System.Windows.Application.Current.Shutdown();
+            Application.Current.Shutdown();
+        }
+
+        private void UpdateGUI_Icons()
+        {
+            VPN_Controller.CheckConnection();
+            List<NetworkInterface> interfaceList = new List<NetworkInterface>(VPN_Controller.Netinterfaces);
+
+            foreach (var connection in interfaceList)
+            {
+                foreach (WrapPanel row in stkpnl_Container.Children)
+                {
+                    if ((string)((Button)row.Children[1]).Content == connection.Name)
+                    {
+                        Change_Entry_Icon(row.Children[0]);
+                    }
+                }
+                foreach (MenuItem entry in TbI.ContextMenu.Items)
+                {
+                    if ((string)entry.Header == connection.Name)
+                    {
+                        Change_Entry_Icon(entry);
+                    }
+                }
+            }
+            lbl_ConnectionStatus.Content = VPN_Controller.ConnectionStatus;
+            lbl_CurrentIP.Content = VPN_Controller.CurrentIP;
+        }
+
+        private void UpdateOnMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            UpdateGUI_Icons();
         }
     }
 }

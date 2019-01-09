@@ -15,12 +15,22 @@ namespace VPN_Switch
 {
     public static class VPN_Controller
     {
-        public static NetworkInterface netinterface { get; set; }
+        public static IList<NetworkInterface> Netinterfaces { get; set; }
         public static string ConnectionStatus { get; set; }
         public static string CurrentIP { get; set; }
 
         public static bool CheckConnection()
         {
+            if (Netinterfaces == null)
+            {
+                Netinterfaces = new List<NetworkInterface>();
+            }
+            else
+            {
+                Netinterfaces.Clear();
+            }
+
+            ConnectionStatus = "";
             if (NetworkInterface.GetIsNetworkAvailable())
             {
                 NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
@@ -31,15 +41,18 @@ namespace VPN_Switch
                     {
                         if ((Interface.NetworkInterfaceType == NetworkInterfaceType.Ppp) && (Interface.NetworkInterfaceType != NetworkInterfaceType.Loopback))
                         {
-                            netinterface = Interface;
-                            ConnectionStatus = "Your are connected to " + netinterface.Name;
+                            Netinterfaces.Add(Interface);
+                            ConnectionStatus += "Your are connected to " + Interface.Name;
                             CurrentIP = GetLocalIPAddress();
-                            return true;
                         }
                     }
                 }
+                if (Netinterfaces.Count != 0)
+                {
+                    return true;
+                }
             }
-            netinterface = null;
+
             ConnectionStatus = "You are disconnected";
             CurrentIP = GetLocalIPAddress();
             return false;

@@ -6,11 +6,15 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:local="clr-namespace:VPN_Switch"
         mc:Ignorable="d"
-        Title="MainWindow" Height="369" Width="600">
+        Title="MainWindow" Height="369" Width="600" MouseMove="UpdateOnMouseMove">
+
     <Grid>
+
         <tb:TaskbarIcon x:Name="TbI"
             IconSource="/shield.ico"
-            ToolTipText="hello world">
+            ToolTipText="hello world"
+
+            LeftClickCommand="">
 
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu
