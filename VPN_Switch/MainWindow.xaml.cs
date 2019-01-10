@@ -3,8 +3,6 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Diagnostics;
-using System.Net;
-using System.Net.Sockets;
 using DotRas;
 using System.Net.NetworkInformation;
 using MenuItem = System.Windows.Controls.MenuItem;
@@ -12,6 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Threading;
 using System.Collections.Generic;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace VPN_Switch
 {
@@ -20,9 +19,10 @@ namespace VPN_Switch
     /// </summary>
     public partial class MainWindow : Window
     {
-        public bool isConnected = false;
         public static Process rasdial = new Process();
+        private bool isConnected = false;
         public NetworkInterface netinterface;
+        private DispatcherTimer timer;
 
         public MainWindow()
         {
@@ -30,39 +30,20 @@ namespace VPN_Switch
 
             SetupRasDial();
 
-            VPN_Controller.CheckConnection();
-
+            isConnected = VPN_Controller.CheckConnection();
+            TbI.IconSource = SetIcon()
             lbl_CurrentIP.Content = VPN_Controller.GetLocalIPAddress();
 
             lbl_ConnectionStatus.Content = VPN_Controller.ConnectionStatus;
 
             ReadPhonebook();
 
-            UpdateGUI_Icons();
-
-            //TbI.DoubleClickCommand = ShowWindow_Clicked;
-
-            StartBackgroundChecker();
+            InitialiseTimer();
         }
 
-        private void StartBackgroundChecker()
+        public string TrayIcon
         {
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.DoWork += CheckConnection_Background;
-            worker.RunWorkerAsync();
-        }
-
-        public void CheckConnection_Background(object sender, DoWorkEventArgs e)
-        {
-            while (true)
-            {
-                VPN_Controller.CheckConnection();
-
-                //lbl_ConnectionStatus.Content = VPN_Controller.ConnectionStatus; };
-
-                e.Result = VPN_Controller.ConnectionStatus;
-                Thread.Sleep(5000);
-            }
+            get { return Environment.CurrentDirectory + @"\Images\Tray_ok.ico"; }
         }
 
         private void SetupRasDial()
@@ -74,10 +55,9 @@ namespace VPN_Switch
             rasdial.StartInfo.CreateNoWindow = true;
         }
 
-        //ROW TEST
         private void CreateVPNRow(string vpnName)
         {
-            SetIcon("nok.png", out BitmapImage bitmap, out Image image);
+            SetIcon("Connection_error.ico", out BitmapImage bitmap, out Image image);
 
             WrapPanel wp = new WrapPanel();
 
@@ -141,42 +121,45 @@ namespace VPN_Switch
             {
                 if (imageholder is MenuItem item)
                 {
-                    if (VPN_Controller.CheckConnection())
+                    if (isConnected)
                     {
-                        SetIcon("ok.png", out BitmapImage bitmap, out Image image);
+                        SetIcon("Connection_ok.ico", out BitmapImage bitmap, out Image image);
                         item.Icon = image;
                     }
                     else
                     {
-                        SetIcon("nok.png", out BitmapImage bitmap, out Image image);
+                        SetIcon("Connection_error.ico", out BitmapImage bitmap, out Image image);
                         item.Icon = image;
                         //MessageBox.Show("Connection Failed,\n Please check Username and/or Password", "Error");
                     }
                 }
                 else if (imageholder is Image img)
                 {
-                    if (VPN_Controller.CheckConnection())
+                    if (isConnected)
                     {
-                        SetIcon("ok.png", out BitmapImage bitmap, out Image image);
+                        SetIcon("Connection_ok.ico", out BitmapImage bitmap, out Image image);
                         img.Source = bitmap;
                     }
                     else
                     {
-                        SetIcon("nok.png", out BitmapImage bitmap, out Image image);
+                        SetIcon("Connection_error.ico", out BitmapImage bitmap, out Image image);
                         img.Source = bitmap;
                     }
                 }
             }
             catch (Exception ex)
             {
+                MessageBox.Show(ex.Message);
             }
         }
 
         private void Connect_Clicked(object sender, RoutedEventArgs e)
         {
+            isConnected = VPN_Controller.CheckConnection();
+
             if (sender is Button btn)
             {
-                if (VPN_Controller.CheckConnection())
+                if (isConnected)
                 {
                     VPN_Controller.CloseConnection((string)btn.Content);
                 }
@@ -184,6 +167,7 @@ namespace VPN_Switch
                 {
                     VPN_Controller.OpenConnection((string)btn.Content, "", "");
                 }
+
                 foreach (var child in ((WrapPanel)btn.Parent).Children)
                 {
                     if (child is Image img)
@@ -205,7 +189,7 @@ namespace VPN_Switch
             image = new Image();
             bitmap = new BitmapImage();
             bitmap.BeginInit();
-            bitmap.UriSource = new Uri(Environment.CurrentDirectory + @"\" + iconName);
+            bitmap.UriSource = new Uri(Environment.CurrentDirectory + @"\Images\" + iconName);
             bitmap.EndInit();
             // Set Image.Source
             image.Source = bitmap;
@@ -235,35 +219,63 @@ namespace VPN_Switch
             Application.Current.Shutdown();
         }
 
+        private void InitialiseTimer()
+        {
+            timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(5)
+            };
+            timer.Tick += Timer_Tick;
+            timer.Start();
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            UpdateGUI_Icons();
+        }
+
         private void UpdateGUI_Icons()
         {
-            VPN_Controller.CheckConnection();
+            isConnected = VPN_Controller.CheckConnection();
             List<NetworkInterface> interfaceList = new List<NetworkInterface>(VPN_Controller.Netinterfaces);
-
-            foreach (var connection in interfaceList)
+            if (isConnected)
             {
-                foreach (WrapPanel row in stkpnl_Container.Children)
+                foreach (var connection in interfaceList)
                 {
-                    if ((string)((Button)row.Children[1]).Content == connection.Name)
+                    foreach (WrapPanel row in stkpnl_Container.Children)
                     {
-                        Change_Entry_Icon(row.Children[0]);
+                        if ((string)((Button)row.Children[1]).Content == connection.Name)
+                        {
+                            Change_Entry_Icon(row.Children[0]);
+                        }
                     }
-                }
-                foreach (MenuItem entry in TbI.ContextMenu.Items)
-                {
-                    if ((string)entry.Header == connection.Name)
+                    foreach (MenuItem entry in TbI.ContextMenu.Items)
                     {
-                        Change_Entry_Icon(entry);
+                        if ((string)entry.Header == connection.Name)
+                        {
+                            Change_Entry_Icon(entry);
+                        }
                     }
                 }
             }
+            else
+            {
+                foreach (WrapPanel row in stkpnl_Container.Children)
+                {
+                    Change_Entry_Icon(row.Children[0]);
+                }
+                foreach (MenuItem entry in TbI.ContextMenu.Items)
+                {
+                    Change_Entry_Icon(entry);
+                }
+            }
+
             lbl_ConnectionStatus.Content = VPN_Controller.ConnectionStatus;
             lbl_CurrentIP.Content = VPN_Controller.CurrentIP;
         }
 
         private void UpdateOnMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            UpdateGUI_Icons();
         }
     }
 }

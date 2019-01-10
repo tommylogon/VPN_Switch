@@ -4,17 +4,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:tb="http://www.hardcodet.net/taskbar"
+        xmlns:utils="clr-namespace:VPN_Switch.Utils"
         xmlns:local="clr-namespace:VPN_Switch"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="369" Width="600" MouseMove="UpdateOnMouseMove">
+
+        mc:Ignorable="d" Title="MainWindow" Height="369" Width="600" MouseMove="UpdateOnMouseMove">
 
     <Grid>
-
+        <Grid.Resources>
+            <utils:ShowWindowCommand x:Key="WindowCommand" />
+        </Grid.Resources>
         <tb:TaskbarIcon x:Name="TbI"
-            IconSource="/shield.ico"
-            ToolTipText="hello world"
+            IconSource="Tray_ok.ico"
+            ToolTipText="VPN Switch"
 
-            LeftClickCommand="">
+            LeftClickCommand="{StaticResource WindowCommand}">
 
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu
@@ -24,14 +27,20 @@
                             <Image></Image>
                         </MenuItem.Icon>
                     </MenuItem>
+                    <MenuItem Header="Exit" Click="Exit_Clicked">
+                        <MenuItem.Icon>
+                            <Image></Image>
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
+        <TextBlock Text="path is= {Binding TrayIconPath}" Margin="122,272,253,43" />
         <Label Content="Current IP: " HorizontalAlignment="Left" Margin="122,241,0,0" VerticalAlignment="Top" />
         <Button x:Name="button2" Content="Close and exit" HorizontalAlignment="Left" Margin="499,10,0,0" VerticalAlignment="Top" Width="83" Click="Exit_Clicked" />
         <Label x:Name="lbl_ConnectionStatus" Content="Connected/ Disconnected" HorizontalAlignment="Left" Margin="122,223,0,0" VerticalAlignment="Top" />
         <Label x:Name="lbl_CurrentIP" Content="10.0.0.1" HorizontalAlignment="Left" Margin="196,241,0,0" VerticalAlignment="Top" />
-        <StackPanel x:Name="stkpnl_Container" HorizontalAlignment="Left" Height="170" Margin="93,28,0,0" VerticalAlignment="Top" Width="278" RenderTransformOrigin="0.5,0.5">
+        <StackPanel x:Name="stkpnl_Container" HorizontalAlignment="Left" Height="170" Margin="112,35,0,0" VerticalAlignment="Top" Width="278" RenderTransformOrigin="0.5,0.5">
             <StackPanel.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform />

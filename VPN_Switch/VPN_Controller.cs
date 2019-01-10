@@ -70,9 +70,11 @@ namespace VPN_Switch
 
             if (exitcode == 691)
             {
-                Dialog dialog = new Dialog();
-                dialog.Message = "Please enter your login information";
-                dialog.VPN_Name = vpnName;
+                Dialog dialog = new Dialog
+                {
+                    Message = "Please enter your login information",
+                    VPN_Name = vpnName
+                };
                 dialog.SetDialogMessage();
                 dialog.Show();
             }

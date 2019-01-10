@@ -63,29 +63,89 @@ namespace VPN_Switch.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon shield {
+        internal static System.Drawing.Icon Connection_error {
             get {
-                object obj = ResourceManager.GetObject("shield", resourceCulture);
+                object obj = ResourceManager.GetObject("Connection_error", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap shield1 {
-            get {
-                object obj = ResourceManager.GetObject("shield1", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon wifi {
+        internal static System.Drawing.Icon Connection_OK {
             get {
-                object obj = ResourceManager.GetObject("wifi", resourceCulture);
+                object obj = ResourceManager.GetObject("Connection_OK", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Connection_Warning {
+            get {
+                object obj = ResourceManager.GetObject("Connection_Warning", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Exit {
+            get {
+                object obj = ResourceManager.GetObject("Exit", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon RDP {
+            get {
+                object obj = ResourceManager.GetObject("RDP", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Tray_error {
+            get {
+                object obj = ResourceManager.GetObject("Tray_error", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Tray_info {
+            get {
+                object obj = ResourceManager.GetObject("Tray_info", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Tray_ok {
+            get {
+                object obj = ResourceManager.GetObject("Tray_ok", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Tray_warning {
+            get {
+                object obj = ResourceManager.GetObject("Tray_warning", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }
