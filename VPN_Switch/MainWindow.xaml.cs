@@ -31,7 +31,7 @@ namespace VPN_Switch
             SetupRasDial();
 
             isConnected = VPN_Controller.CheckConnection();
-            TbI.IconSource = SetIcon()
+            //TbI.IconSource = SetIcon()
             lbl_CurrentIP.Content = VPN_Controller.GetLocalIPAddress();
 
             lbl_ConnectionStatus.Content = VPN_Controller.ConnectionStatus;
