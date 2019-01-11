@@ -7,7 +7,7 @@
         xmlns:utils="clr-namespace:VPN_Switch.Utils"
         xmlns:local="clr-namespace:VPN_Switch"
 
-        mc:Ignorable="d" Title="MainWindow" Height="369" Width="600" MouseMove="UpdateOnMouseMove">
+        mc:Ignorable="d" Title="MainWindow" Height="369" Width="600">
 
     <Grid>
         <Grid.Resources>
@@ -40,15 +40,24 @@
         <Button x:Name="btn_Exit" Content="Close and exit" HorizontalAlignment="Left" Margin="499,10,0,0" VerticalAlignment="Top" Width="83" Click="Exit_Clicked" />
         <Label x:Name="lbl_ConnectionStatus" Content="Connected/ Disconnected" HorizontalAlignment="Left" Margin="122,223,0,0" VerticalAlignment="Top" />
         <Label x:Name="lbl_CurrentIP" Content="10.0.0.1" HorizontalAlignment="Left" Margin="196,241,0,0" VerticalAlignment="Top" />
-        <StackPanel x:Name="stkpnl_Container" HorizontalAlignment="Left" Height="170" Margin="112,35,0,0" VerticalAlignment="Top" Width="278" RenderTransformOrigin="0.5,0.5">
-            <StackPanel.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform />
-                    <SkewTransform />
-                    <RotateTransform Angle="0.154" />
-                    <TranslateTransform />
-                </TransformGroup>
-            </StackPanel.RenderTransform>
-        </StackPanel>
+        <DataGrid x:Name="dg_DataGrid" CanUserAddRows="False" HorizontalAlignment="Left" Height="134" VerticalAlignment="Top" Width="509" Margin="22,55,0,0" ItemsSource="{Binding VpnList,Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False">
+            <DataGrid.ItemContainerStyle>
+                <Style TargetType="DataGridRow">
+                    <EventSetter Event="MouseDoubleClick" Handler="Row_DoubleClick" />
+                </Style>
+            </DataGrid.ItemContainerStyle>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Connection"  IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding Image}" Width="25" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="VPN Name" Binding="{Binding Name}" FontSize="20" IsReadOnly="True" />
+                <DataGridTextColumn Header="IP" Binding="{Binding IP}" IsReadOnly="True" />
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" IsReadOnly="True" />
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>

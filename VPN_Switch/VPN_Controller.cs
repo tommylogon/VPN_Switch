@@ -35,7 +35,7 @@ namespace VPN_Switch
                         if ((Interface.NetworkInterfaceType == NetworkInterfaceType.Ppp) && (Interface.NetworkInterfaceType != NetworkInterfaceType.Loopback))
                         {
                             Netinterfaces.Add(Interface);
-                            ConnectionStatus += "Your are connected to " + Interface.Name;
+                            ConnectionStatus += "Connected";
                             CurrentIP = GetLocalIPAddress();
                         }
                     }
@@ -46,7 +46,7 @@ namespace VPN_Switch
                 }
             }
 
-            ConnectionStatus = "You are disconnected";
+            ConnectionStatus = "disconnected";
             CurrentIP = GetLocalIPAddress();
             return false;
         }
