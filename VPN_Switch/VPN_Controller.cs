@@ -1,23 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace VPN_Switch
 {
     public static class VPN_Controller
     {
-        public static IList<NetworkInterface> Netinterfaces { get; set; }
         public static string ConnectionStatus { get; set; }
         public static string CurrentIP { get; set; }
+        public static IList<NetworkInterface> Netinterfaces { get; set; }
 
         public static bool CheckConnection()
         {
@@ -58,32 +51,6 @@ namespace VPN_Switch
             return false;
         }
 
-        public static void OpenConnection(string vpnName, string username, string password)
-        {
-            MainWindow.rasdial.StartInfo.Arguments = vpnName + " " + username + " " + password;
-            MainWindow.rasdial.Start();
-
-            string output = MainWindow.rasdial.StandardOutput.ReadToEnd();
-            string error = MainWindow.rasdial.StandardError.ReadToEnd();
-            var exitcode = MainWindow.rasdial.ExitCode;
-            MainWindow.rasdial.WaitForExit();
-
-            if (exitcode == 691)
-            {
-                Dialog dialog = new Dialog
-                {
-                    Message = "Please enter your login information",
-                    VPN_Name = vpnName
-                };
-                dialog.SetDialogMessage();
-                dialog.Show();
-            }
-            else
-            {
-                CheckConnection();
-            }
-        }
-
         public static void CloseConnection(string vpnName)
         {
             MainWindow.rasdial.StartInfo.Arguments = vpnName + " /d";
@@ -111,6 +78,32 @@ namespace VPN_Switch
             else
             {
                 throw new Exception("No network adapters with an IPv4 address in the system!");
+            }
+        }
+
+        public static void OpenConnection(string vpnName, string username, string password)
+        {
+            MainWindow.rasdial.StartInfo.Arguments = vpnName + " " + username + " " + password;
+            MainWindow.rasdial.Start();
+
+            string output = MainWindow.rasdial.StandardOutput.ReadToEnd();
+            string error = MainWindow.rasdial.StandardError.ReadToEnd();
+            var exitcode = MainWindow.rasdial.ExitCode;
+            MainWindow.rasdial.WaitForExit();
+
+            if (exitcode == 691)
+            {
+                Dialog dialog = new Dialog
+                {
+                    Message = "Please enter your login information",
+                    VPN_Name = vpnName
+                };
+                dialog.SetDialogMessage();
+                dialog.Show();
+            }
+            else
+            {
+                CheckConnection();
             }
         }
     }

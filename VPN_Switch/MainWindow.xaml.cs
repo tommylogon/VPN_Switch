@@ -1,16 +1,15 @@
-﻿using System;
+﻿using DotRas;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Net.NetworkInformation;
 using System.Windows;
 using System.Windows.Controls;
-using System.Diagnostics;
-using DotRas;
-using System.Net.NetworkInformation;
-using MenuItem = System.Windows.Controls.MenuItem;
-using System.Windows.Media.Imaging;
-using System.Threading;
-using System.Collections.Generic;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using MenuItem = System.Windows.Controls.MenuItem;
 
 namespace VPN_Switch
 {
@@ -20,8 +19,8 @@ namespace VPN_Switch
     public partial class MainWindow : Window
     {
         public static Process rasdial = new Process();
-        private bool isConnected = false;
         public NetworkInterface netinterface;
+        private bool isConnected = false;
         private DispatcherTimer timer;
 
         public MainWindow()
@@ -46,63 +45,6 @@ namespace VPN_Switch
             get { return Environment.CurrentDirectory + @"\Images\Tray_ok.ico"; }
         }
 
-        private void SetupRasDial()
-        {
-            rasdial.StartInfo.FileName = "rasdial.exe";
-            rasdial.StartInfo.RedirectStandardError = true;
-            rasdial.StartInfo.RedirectStandardOutput = true;
-            rasdial.StartInfo.UseShellExecute = false;
-            rasdial.StartInfo.CreateNoWindow = true;
-        }
-
-        private void CreateVPNRow(string vpnName)
-        {
-            SetIcon("Connection_error.ico", out BitmapImage bitmap, out Image image);
-
-            WrapPanel wp = new WrapPanel();
-
-            Image img = new Image
-            {
-                Width = 25
-            };
-            img.Margin = new Thickness(2, 2, 2, 2);
-            img.Source = bitmap;
-
-            Button btn = new Button
-            {
-                Content = vpnName
-            };
-            btn.FontSize = 15;
-            btn.Margin = new Thickness(2, 2, 2, 2);
-            btn.Click += Connect_Clicked;
-
-            Button rdp = new Button
-            {
-                Content = "RDP"
-            };
-            //rdp.Click += ConnectRDP;
-            rdp.Background = Brushes.Red;
-            rdp.Margin = new Thickness(2, 2, 2, 2);
-            wp.Children.Add(img);
-            wp.Children.Add(btn);
-            wp.Children.Add(rdp);
-
-            stkpnl_Container.Children.Add(wp);
-        }
-
-        private void ShowWindow_Clicked(object sender, RoutedEventArgs e)
-        {
-            this.Visibility = Visibility.Visible;
-        }
-
-        // minimize to system tray when applicaiton is minimized
-        //protected override void OnStateChanged(EventArgs e)
-        //{
-        //    if (WindowState == WindowState.Minimized) this.Hide();
-
-        //    base.OnStateChanged(e);
-        //}
-
         // minimize to system tray when applicaiton is closed
         protected override void OnClosing(CancelEventArgs e)
         {
@@ -115,6 +57,8 @@ namespace VPN_Switch
             base.OnClosing(e);
         }
 
+        //    base.OnStateChanged(e);
+        //}
         private void Change_Entry_Icon(object imageholder)
         {
             try
@@ -153,6 +97,10 @@ namespace VPN_Switch
             }
         }
 
+        // minimize to system tray when applicaiton is minimized
+        //protected override void OnStateChanged(EventArgs e)
+        //{
+        //    if (WindowState == WindowState.Minimized) this.Hide();
         private void Connect_Clicked(object sender, RoutedEventArgs e)
         {
             isConnected = VPN_Controller.CheckConnection();
@@ -184,15 +132,54 @@ namespace VPN_Switch
             }
         }
 
-        private void SetIcon(string iconName, out BitmapImage bitmap, out Image image)
+        private void CreateVPNRow(string vpnName)
         {
-            image = new Image();
-            bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = new Uri(Environment.CurrentDirectory + @"\Images\" + iconName);
-            bitmap.EndInit();
-            // Set Image.Source
-            image.Source = bitmap;
+            SetIcon("Connection_error.ico", out BitmapImage bitmap, out Image image);
+
+            WrapPanel wp = new WrapPanel();
+
+            Image img = new Image
+            {
+                Width = 25
+            };
+            img.Margin = new Thickness(2, 2, 2, 2);
+            img.Source = bitmap;
+
+            Button btn = new Button
+            {
+                Content = vpnName
+            };
+            btn.FontSize = 15;
+            btn.Margin = new Thickness(2, 2, 2, 2);
+            btn.Click += Connect_Clicked;
+
+            Button rdp = new Button
+            {
+                Content = "RDP"
+            };
+            //rdp.Click += ConnectRDP;
+            rdp.Background = Brushes.Red;
+            rdp.Margin = new Thickness(2, 2, 2, 2);
+            wp.Children.Add(img);
+            wp.Children.Add(btn);
+            wp.Children.Add(rdp);
+
+            stkpnl_Container.Children.Add(wp);
+        }
+
+        private void Exit_Clicked(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
+        private void InitialiseTimer()
+        {
+            timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(5)
+            };
+            timer.Tick += Timer_Tick;
+            timer.Start();
         }
 
         private void ReadPhonebook()
@@ -214,19 +201,29 @@ namespace VPN_Switch
             }
         }
 
-        private void Exit_Clicked(object sender, RoutedEventArgs e)
+        private void SetIcon(string iconName, out BitmapImage bitmap, out Image image)
         {
-            Application.Current.Shutdown();
+            image = new Image();
+            bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(Environment.CurrentDirectory + @"\Images\" + iconName);
+            bitmap.EndInit();
+            // Set Image.Source
+            image.Source = bitmap;
         }
 
-        private void InitialiseTimer()
+        private void SetupRasDial()
         {
-            timer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(5)
-            };
-            timer.Tick += Timer_Tick;
-            timer.Start();
+            rasdial.StartInfo.FileName = "rasdial.exe";
+            rasdial.StartInfo.RedirectStandardError = true;
+            rasdial.StartInfo.RedirectStandardOutput = true;
+            rasdial.StartInfo.UseShellExecute = false;
+            rasdial.StartInfo.CreateNoWindow = true;
+        }
+
+        private void ShowWindow_Clicked(object sender, RoutedEventArgs e)
+        {
+            this.Visibility = Visibility.Visible;
         }
 
         private void Timer_Tick(object sender, EventArgs e)

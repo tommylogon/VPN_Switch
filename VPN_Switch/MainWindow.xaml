@@ -37,7 +37,7 @@
         </tb:TaskbarIcon>
 
         <Label Content="Current IP: " HorizontalAlignment="Left" Margin="122,241,0,0" VerticalAlignment="Top" />
-        <Button x:Name="button2" Content="Close and exit" HorizontalAlignment="Left" Margin="499,10,0,0" VerticalAlignment="Top" Width="83" Click="Exit_Clicked" />
+        <Button x:Name="btn_Exit" Content="Close and exit" HorizontalAlignment="Left" Margin="499,10,0,0" VerticalAlignment="Top" Width="83" Click="Exit_Clicked" />
         <Label x:Name="lbl_ConnectionStatus" Content="Connected/ Disconnected" HorizontalAlignment="Left" Margin="122,223,0,0" VerticalAlignment="Top" />
         <Label x:Name="lbl_CurrentIP" Content="10.0.0.1" HorizontalAlignment="Left" Margin="196,241,0,0" VerticalAlignment="Top" />
         <StackPanel x:Name="stkpnl_Container" HorizontalAlignment="Left" Height="170" Margin="112,35,0,0" VerticalAlignment="Top" Width="278" RenderTransformOrigin="0.5,0.5">
