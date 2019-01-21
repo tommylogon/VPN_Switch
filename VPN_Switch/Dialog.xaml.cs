@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 
 namespace VPN_Switch
 {
@@ -21,6 +22,19 @@ namespace VPN_Switch
         }
 
         private void Connect_Clicked(object sender, RoutedEventArgs e)
+        {
+            Forward_Connect();
+        }
+
+        private void Dialog_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                Forward_Connect();
+            }
+        }
+
+        private void Forward_Connect()
         {
             if (!string.IsNullOrEmpty(dialog_username.Text) || !string.IsNullOrEmpty(dialog_password.Password))
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Windows;
 
 namespace VPN_Switch
 {
@@ -12,7 +13,7 @@ namespace VPN_Switch
         public static string CurrentIP { get; set; }
         public static IList<NetworkInterface> Netinterfaces { get; set; }
 
-        public static bool CheckConnection()
+        public static bool CheckConnection(string vpnName)
         {
             if (Netinterfaces == null)
             {
@@ -24,6 +25,7 @@ namespace VPN_Switch
             }
 
             ConnectionStatus = "";
+
             if (NetworkInterface.GetIsNetworkAvailable())
             {
                 NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
@@ -57,7 +59,9 @@ namespace VPN_Switch
             MainWindow.rasdial.Start();
             MainWindow.rasdial.WaitForExit();
 
-            CheckConnection();
+            //CheckConnection();
+
+            //https://vpn.hhmaskin.no:4433
         }
 
         public static string GetLocalIPAddress()
@@ -100,6 +104,10 @@ namespace VPN_Switch
                 };
                 dialog.SetDialogMessage();
                 dialog.Show();
+            }
+            else if (exitcode != 0)
+            {
+                MessageBox.Show(exitcode + ": " + error);
             }
             else
             {

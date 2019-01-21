@@ -4,60 +4,109 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:tb="http://www.hardcodet.net/taskbar"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:utils="clr-namespace:VPN_Switch.Utils"
         xmlns:local="clr-namespace:VPN_Switch"
 
-        mc:Ignorable="d" Title="MainWindow" Height="369" Width="600">
-
-    <Grid>
-        <Grid.Resources>
-            <utils:ShowWindowCommand x:Key="WindowCommand" />
-        </Grid.Resources>
-        <tb:TaskbarIcon x:Name="TbI"
+        mc:Ignorable="d" Title="MainWindow" Height="369" Width="724">
+    <Viewbox HorizontalAlignment="Left" Height="336" VerticalAlignment="Top" Width="716">
+        <Grid Width="764" Height="358" Background="#FFC3C3C3">
+            <Grid.Resources>
+                <utils:ShowWindowCommand x:Key="WindowCommand" />
+            </Grid.Resources>
+            <tb:TaskbarIcon x:Name="TbI"
             IconSource="Tray_ok.ico"
             ToolTipText="VPN Switch"
 
             LeftClickCommand="{StaticResource WindowCommand}">
 
-            <tb:TaskbarIcon.ContextMenu>
-                <ContextMenu
+                <tb:TaskbarIcon.ContextMenu>
+                    <ContextMenu
                     Background="White">
-                    <MenuItem Header="Open Window" Click="ShowWindow_Clicked">
-                        <MenuItem.Icon>
-                            <Image></Image>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Exit" Click="Exit_Clicked">
-                        <MenuItem.Icon>
-                            <Image></Image>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                </ContextMenu>
-            </tb:TaskbarIcon.ContextMenu>
-        </tb:TaskbarIcon>
+                        <MenuItem Header="Open Window" Click="ShowWindow_Clicked">
+                            <MenuItem.Icon>
+                                <Image></Image>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Exit" Click="Exit_Clicked">
+                            <MenuItem.Icon>
+                                <Image Source="{Binding ExitIcon}"></Image>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </ContextMenu>
+                </tb:TaskbarIcon.ContextMenu>
+            </tb:TaskbarIcon>
+            <Button x:Name="btn_Exit" Content="Close and exit" HorizontalAlignment="Left" Margin="671,336,0,0" VerticalAlignment="Top" Width="83" Click="Exit_Clicked" />
 
-        <Label Content="Current IP: " HorizontalAlignment="Left" Margin="122,241,0,0" VerticalAlignment="Top" />
-        <Button x:Name="btn_Exit" Content="Close and exit" HorizontalAlignment="Left" Margin="499,10,0,0" VerticalAlignment="Top" Width="83" Click="Exit_Clicked" />
-        <Label x:Name="lbl_ConnectionStatus" Content="Connected/ Disconnected" HorizontalAlignment="Left" Margin="122,223,0,0" VerticalAlignment="Top" />
-        <Label x:Name="lbl_CurrentIP" Content="10.0.0.1" HorizontalAlignment="Left" Margin="196,241,0,0" VerticalAlignment="Top" />
-        <DataGrid x:Name="dg_DataGrid" CanUserAddRows="False" HorizontalAlignment="Left" Height="134" VerticalAlignment="Top" Width="509" Margin="22,55,0,0" ItemsSource="{Binding VpnList,Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False">
-            <DataGrid.ItemContainerStyle>
-                <Style TargetType="DataGridRow">
-                    <EventSetter Event="MouseDoubleClick" Handler="Row_DoubleClick" />
-                </Style>
-            </DataGrid.ItemContainerStyle>
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Connection"  IsReadOnly="True">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Image Source="{Binding Image}" Width="25" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn Header="VPN Name" Binding="{Binding Name}" FontSize="20" IsReadOnly="True" />
-                <DataGridTextColumn Header="IP" Binding="{Binding IP}" IsReadOnly="True" />
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}" IsReadOnly="True" />
-            </DataGrid.Columns>
-        </DataGrid>
-    </Grid>
+            <TextBlock x:Name="txb_FooterMessage" HorizontalAlignment="Left" Margin="0,336,0,-2" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="24" Width="610" />
+            <xctk:SplitButton Margin="322,136,329,196" />
+            <DataGrid x:Name="dg_DataGrid" CanUserAddRows="False" HorizontalAlignment="Left" Height="278" VerticalAlignment="Top" Width="764" Margin="0,53,0,0" ItemsSource="{Binding VpnList, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" SelectionChanged="DataGrid_SelectionChanged">
+                <DataGrid.ItemContainerStyle>
+                    <Style TargetType="{x:Type DataGridRow}">
+                        <EventSetter Event="Control.MouseDoubleClick" Handler="Row_DoubleClick" />
+                    </Style>
+                </DataGrid.ItemContainerStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="VPN Name" Width="120" Binding="{Binding Path=Name}" FontSize="20" IsReadOnly="True" />
+                    <DataGridTemplateColumn Header="Connection"  IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding Path=Image}" Width="25" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="Status" Width="120" Binding="{Binding Path=Status}" IsReadOnly="True" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <ToolBarTray Margin="0,0,0,327" Background="#FFC2C4C7">
+                <ToolBar Margin="0,0,-19,0">
+                    <Menu Width="739">
+                        <MenuItem Header="File">
+                            <MenuItem Header="{Binding ButtonClickAction}" />
+                            <MenuItem Header="Reconnect" Foreground="#FF999999" />
+                            <MenuItem Header="Status" Foreground="#FF999999" />
+                            <Separator />
+                            <MenuItem Header="New" Foreground="#FF999999" />
+                            <MenuItem Header="Import" Foreground="#FF999999" />
+                            <Separator />
+                            <MenuItem Header="Create Shortcut" Foreground="#FF999999" />
+                            <Separator />
+                            <MenuItem Header="Delete" Foreground="#FF999999" />
+                            <MenuItem Header="Rename" Foreground="#FF999999" />
+                            <MenuItem Header="Properties" Foreground="#FF999999" />
+                            <Separator />
+                            <MenuItem Header="Exit" Click="Exit_Clicked" />
+                        </MenuItem>
+                        <MenuItem Header="View" Foreground="#FF999999">
+                            <MenuItem Header="Log Viewers" Foreground="#FF999999" />
+                            <MenuItem Header="Certificates" Foreground="#FF999999" />
+                            <Separator />
+                            <MenuItem Header="Toolbar" Foreground="#FF999999" />
+                            <MenuItem Header="Status Bar" Foreground="#FF999999" />
+                            <Separator />
+                            <MenuItem Header="Select All" Foreground="#FF999999" />
+                            <Separator />
+                            <MenuItem Header="Sort by" Foreground="#FF999999" />
+                            <Separator />
+                            <MenuItem Header="Options" Foreground="#FF999999" />
+                        </MenuItem>
+                        <MenuItem Header="Help" Foreground="#FF999999">
+                            <MenuItem Header="About" Foreground="#FF999999" />
+                        </MenuItem>
+                    </Menu>
+                </ToolBar>
+            </ToolBarTray>
+
+            <WrapPanel Margin="0,31,10,305" RenderTransformOrigin="0.499,0.516">
+                <Button Content="{Binding ButtonClickAction}" Click="Connect_Clicked" Width="100" />
+                <Button Content="Status" Width="100" />
+                <Button Content="+" Width="40" />
+                <Button Content="X" Width="40" />
+                <Button Content="Properties" Width="100" />
+                <Button Content="Show log" Width="98" />
+            </WrapPanel>
+        </Grid>
+    </Viewbox>
 </Window>

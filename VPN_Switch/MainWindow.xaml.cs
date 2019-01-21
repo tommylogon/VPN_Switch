@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-
+using Xceed.Wpf.Toolkit;
 using System.Net.NetworkInformation;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 using MenuItem = System.Windows.Controls.MenuItem;
+using System.Collections.Specialized;
 
 namespace VPN_Switch
 {
@@ -25,8 +26,11 @@ namespace VPN_Switch
         public static Process rasdial = new Process();
         public NetworkInterface netinterface;
         public ObservableCollection<VPN> VpnList { get; } = new ObservableCollection<VPN>();
+        public string ExitIcon { get; set; } = Environment.CurrentDirectory + @"\Images\Exit.ico";
         private bool isConnected = false;
         private DispatcherTimer timer;
+        public string ButtonClickAction;
+        private int SelectedIndex;
 
         public MainWindow()
         {
@@ -34,17 +38,15 @@ namespace VPN_Switch
 
             SetupRasDial();
 
-            isConnected = VPN_Controller.CheckConnection();
-            //TbI.IconSource = SetIcon()
-            lbl_CurrentIP.Content = VPN_Controller.GetLocalIPAddress();
-
-            lbl_ConnectionStatus.Content = VPN_Controller.ConnectionStatus;
-
             ReadPhonebook();
 
             InitialiseTimer();
             this.DataContext = this;
-            //dg_DataGrid.ItemsSource = VpnList;
+            VpnList.CollectionChanged += VpnList_CollectionChanged;
+        }
+
+        private void VpnList_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
         }
 
         public string TrayIcon
@@ -97,58 +99,32 @@ namespace VPN_Switch
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                System.Windows.MessageBox.Show(ex.Message);
             }
             return null;
         }
 
-        private void Connect(VPN vpn)
+        private void Connect(object entry)
         {
-            isConnected = VPN_Controller.CheckConnection();
-
-            if (isConnected)
+            if (entry is VPN vpn)
             {
-                VPN_Controller.CloseConnection(vpn.Name);
+                isConnected = VPN_Controller.CheckConnection(vpn.Name);
+                if (isConnected)
+                {
+                    VPN_Controller.CloseConnection(vpn.Name);
+                }
+                else
+                {
+                    VPN_Controller.OpenConnection(vpn.Name, "", "");
+                }
+                isConnected = VPN_Controller.CheckConnection(vpn.Name);
+                vpn.Image = (BitmapImage)Change_Entry_Icon(vpn.Image);
+                vpn.Status = VPN_Controller.ConnectionStatus;
             }
-            else
+
+            if (entry is MenuItem item)
             {
-                VPN_Controller.OpenConnection(vpn.Name, "", "");
-            }
-            isConnected = VPN_Controller.CheckConnection();
-            vpn.Image = (BitmapImage)Change_Entry_Icon(vpn.Image);
-            vpn.Status = VPN_Controller.ConnectionStatus;
-
-            //foreach (var child in )
-            //{
-            //    if (child is Image img)
-            //    {
-            //        Change_Entry_Icon(img);
-            //    }
-            //}
-
-            lbl_CurrentIP.Content = VPN_Controller.CurrentIP;
-            lbl_ConnectionStatus.Content = VPN_Controller.ConnectionStatus;
-
-            //if (sender is MenuItem item)
-            //{
-            //    Change_Entry_Icon(item);
-            //}
-        }
-
-        public class VPN
-        {
-            public BitmapImage Image { get; set; }
-            public string Name { get; set; }
-            public ObservableCollection<string> ConnectionTypes { get; set; } = new ObservableCollection<string>();
-            public string Status { get; set; }
-            public string IP { get; set; }
-
-            public VPN()
-            {
-                string vpnConnection = "Connect";
-                string rdp = "RDP";
-                ConnectionTypes.Add(vpnConnection);
-                ConnectionTypes.Add(rdp);
+                Change_Entry_Icon(item);
             }
         }
 
@@ -212,7 +188,8 @@ namespace VPN_Switch
                 MenuItem item = new MenuItem();
                 item.Click += Connect_Clicked;
                 item.Header = entry.Name;
-                TbI.ContextMenu.Items.Add(item);
+                TbI.ContextMenu.Items.Insert(TbI.ContextMenu.Items.Count - 1, item);
+                //TbI.ContextMenu.Items.Add(item);
 
                 CreateVPNRow(entry.Name);
             }
@@ -220,7 +197,10 @@ namespace VPN_Switch
 
         private void Connect_Clicked(object sender, RoutedEventArgs e)
         {
-            //Connect(sender);
+            if (dg_DataGrid.SelectedItem != null)
+            {
+                Connect((VPN)dg_DataGrid.SelectedItem);
+            }
         }
 
         private void SetIcon(string iconName, out BitmapImage bitmap, out Image image)
@@ -232,6 +212,13 @@ namespace VPN_Switch
             bitmap.EndInit();
             // Set Image.Source
             image.Source = bitmap;
+        }
+
+        private void RefreshDatagrid()
+        {
+            dg_DataGrid.ItemsSource = null;
+            dg_DataGrid.ItemsSource = VpnList;
+            dg_DataGrid.Items.Refresh();
         }
 
         private void SetupRasDial()
@@ -250,54 +237,66 @@ namespace VPN_Switch
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            UpdateGUI_Icons();
+            //UpdateGUI_Icons();
+            foreach (VPN vpn in VpnList)
+            {
+                vpn.Status = VPN_Controller.ConnectionStatus;
+            }
         }
 
-        private void UpdateGUI_Icons()
+        private void UpdateGUI_Icons(VPN vpn)
         {
-            isConnected = VPN_Controller.CheckConnection();
+            //isConnected = VPN_Controller.CheckConnection(vpn.Name);
 
-            List<NetworkInterface> interfaceList = new List<NetworkInterface>(VPN_Controller.Netinterfaces);
+            //List<NetworkInterface> interfaceList = new List<NetworkInterface>(VPN_Controller.Netinterfaces);
 
-            if (isConnected)
+            //if (isConnected)
+            //{
+            //    foreach (var connection in interfaceList)
+            //    {
+            //        foreach (VPN entryVpn in VpnList)
+            //        {
+            //            if (entryVpn.Name == connection.Name)
+            //            {
+            //                entryVpn.Image = (BitmapImage)Change_Entry_Icon(vpn.Image);
+            //                entryVpn.IP = VPN_Controller.GetLocalIPAddress();
+            //                entryVpn.Status = VPN_Controller.ConnectionStatus;
+            //            }
+            //        }
+            //        foreach (MenuItem entry in TbI.ContextMenu.Items)
+            //        {
+            //            if ((string)entry.Header == connection.Name)
+            //            {
+            //                entry.Icon = Change_Entry_Icon(entry);
+            //            }
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    foreach (VPN vpn in VpnList)
+            //    {
+            //        vpn.Image = (BitmapImage)Change_Entry_Icon(vpn.Image);
+            //        vpn.Status = VPN_Controller.ConnectionStatus;
+            //    }
+            //    foreach (MenuItem entry in TbI.ContextMenu.Items)
+            //    {
+            //        if ((string)entry.Header != "Exit" || (string)entry.Header != "Open Window")
+            //        {
+            //            entry.Icon = Change_Entry_Icon(entry);
+            //        }
+            //    }
+            //}
+            //RefreshDatagrid();
+            //dg_DataGrid.SelectedIndex = SelectedIndex;
+        }
+
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (((DataGrid)sender).SelectedIndex != -1)
             {
-                foreach (var connection in interfaceList)
-                {
-                    foreach (VPN vpn in VpnList)
-                    {
-                        if (vpn.Name == connection.Name)
-                        {
-                            vpn.Image = (BitmapImage)Change_Entry_Icon(vpn.Image);
-                            vpn.IP = VPN_Controller.GetLocalIPAddress();
-                            vpn.Status = VPN_Controller.ConnectionStatus;
-                        }
-                    }
-                    foreach (MenuItem entry in TbI.ContextMenu.Items)
-                    {
-                        if ((string)entry.Header == connection.Name)
-                        {
-                            entry.Icon = Change_Entry_Icon(entry);
-                        }
-                    }
-                }
+                SelectedIndex = ((DataGrid)sender).SelectedIndex;
             }
-            else
-            {
-                foreach (VPN vpn in VpnList)
-                {
-                    vpn.Image = (BitmapImage)Change_Entry_Icon(vpn.Image);
-                    vpn.Status = VPN_Controller.ConnectionStatus;
-                }
-                foreach (MenuItem entry in TbI.ContextMenu.Items)
-                {
-                    entry.Icon = Change_Entry_Icon(entry);
-                }
-            }
-            dg_DataGrid.ItemsSource = null;
-            dg_DataGrid.ItemsSource = VpnList;
-            dg_DataGrid.Items.Refresh();
-            lbl_ConnectionStatus.Content = VPN_Controller.ConnectionStatus;
-            lbl_CurrentIP.Content = VPN_Controller.CurrentIP;
         }
     }
 }

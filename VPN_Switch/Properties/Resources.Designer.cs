@@ -73,6 +73,16 @@ namespace VPN_Switch.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
+        internal static System.Drawing.Icon Connection_Loading {
+            get {
+                object obj = ResourceManager.GetObject("Connection_Loading", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
         internal static System.Drawing.Icon Connection_OK {
             get {
                 object obj = ResourceManager.GetObject("Connection_OK", resourceCulture);
