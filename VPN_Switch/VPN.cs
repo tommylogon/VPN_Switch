@@ -13,8 +13,8 @@ namespace VPN_Switch
     {
         private BitmapImage image;
         private string name;
-        private string status;
-        private string ip;
+        private bool status;
+        private string hostName;
 
         public BitmapImage Image
         {
@@ -48,7 +48,7 @@ namespace VPN_Switch
             }
         }
 
-        public string Status
+        public bool Status
         {
             get
             {
@@ -64,18 +64,18 @@ namespace VPN_Switch
             }
         }
 
-        public string IP
+        public string HostName
         {
             get
             {
-                return ip;
+                return hostName;
             }
             set
             {
-                if (ip != value)
+                if (hostName != value)
                 {
-                    ip = value;
-                    OnPropertyChanged("IP");
+                    hostName = value;
+                    OnPropertyChanged("HostName");
                 }
             }
         }

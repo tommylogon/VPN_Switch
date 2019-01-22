@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using Xceed.Wpf.Toolkit;
 using System.Net.NetworkInformation;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,16 +20,40 @@ namespace VPN_Switch
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         public static Process rasdial = new Process();
         public NetworkInterface netinterface;
         public ObservableCollection<VPN> VpnList { get; } = new ObservableCollection<VPN>();
         public string ExitIcon { get; set; } = Environment.CurrentDirectory + @"\Images\Exit.ico";
-        private bool isConnected = false;
+        private string buttonClickAction = "Enable";
+
+        public string ButtonClickAction
+        {
+            get
+            {
+                return buttonClickAction;
+            }
+            set
+            {
+                if (buttonClickAction != value)
+                {
+                    buttonClickAction = value;
+                    OnPropertyChanged("ButtonClickAction");
+                }
+            }
+        }
+
         private DispatcherTimer timer;
-        public string ButtonClickAction;
         private int SelectedIndex;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(String propertyName)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         public MainWindow()
         {
@@ -42,13 +65,11 @@ namespace VPN_Switch
 
             InitialiseTimer();
             this.DataContext = this;
-            VpnList.CollectionChanged += VpnList_CollectionChanged;
         }
 
-        private void VpnList_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-        }
-
+        /// <summary>
+        ///
+        /// </summary>
         public string TrayIcon
         {
             get { return Environment.CurrentDirectory + @"\Images\Tray_ok.ico"; }
@@ -59,14 +80,19 @@ namespace VPN_Switch
         {
             // setting cancel to true will cancel the close request
             // so the application is not closed
-            e.Cancel = true;
+            //e.Cancel = true;
 
-            this.Hide();
+            //this.Hide();
 
-            base.OnClosing(e);
+            //base.OnClosing(e);
         }
 
-        private object Change_Entry_Icon(object imageholder)
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="imageholder"></param>
+        /// <returns></returns>
+        private object Change_Entry_Icon(object imageholder, bool isConnected)
         {
             BitmapImage newBitMap;
             Image newImage;
@@ -104,12 +130,16 @@ namespace VPN_Switch
             return null;
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="entry"></param>
         private void Connect(object entry)
         {
             if (entry is VPN vpn)
             {
-                isConnected = VPN_Controller.CheckConnection(vpn.Name);
-                if (isConnected)
+                vpn.Status = VPN_Controller.CheckConnection(vpn.Name);
+                if (vpn.Status)
                 {
                     VPN_Controller.CloseConnection(vpn.Name);
                 }
@@ -117,14 +147,13 @@ namespace VPN_Switch
                 {
                     VPN_Controller.OpenConnection(vpn.Name, "", "");
                 }
-                isConnected = VPN_Controller.CheckConnection(vpn.Name);
-                vpn.Image = (BitmapImage)Change_Entry_Icon(vpn.Image);
-                vpn.Status = VPN_Controller.ConnectionStatus;
+                vpn.Image = (BitmapImage)Change_Entry_Icon(vpn.Image, vpn.Status);
+                vpn.Status = VPN_Controller.CheckConnection(vpn.Name);
             }
 
             if (entry is MenuItem item)
             {
-                Change_Entry_Icon(item);
+                //Change_Entry_Icon(item);
             }
         }
 
@@ -139,24 +168,38 @@ namespace VPN_Switch
             }
         }
 
-        private void CreateVPNRow(string vpnName)
+        private void CreateVPNRow(string vpnName, string hostname)
         {
-            VPN newVPN = new VPN();
-
-            SetIcon("Connection_error.ico", out BitmapImage bitmap, out Image image);
-
+            BitmapImage bitmap;
             Image img = new Image
             {
                 Width = 25
             };
             img.Margin = new Thickness(2, 2, 2, 2);
+
+            VPN newVPN = new VPN();
+
+            newVPN.Name = vpnName;
+            newVPN.HostName = hostname;
+            newVPN.Status = VPN_Controller.CheckConnection(newVPN.Name);
+
+            if (newVPN.Status)
+            {
+                SetIcon("Connection_OK.ico", out BitmapImage bitmapSource, out Image image);
+                bitmap = bitmapSource;
+                img = image;
+            }
+            else
+            {
+                SetIcon("Connection_error.ico", out BitmapImage bitmapSource, out Image image);
+                bitmap = bitmapSource;
+                img = image;
+            }
+
             img.Source = bitmap;
 
             newVPN.Image = bitmap;
 
-            newVPN.Name = vpnName;
-
-            //btn.Click += Connect_Clicked;
             VpnList.Add(newVPN);
         }
 
@@ -171,6 +214,7 @@ namespace VPN_Switch
             {
                 Interval = TimeSpan.FromSeconds(5)
             };
+
             timer.Tick += Timer_Tick;
             timer.Start();
         }
@@ -189,9 +233,8 @@ namespace VPN_Switch
                 item.Click += Connect_Clicked;
                 item.Header = entry.Name;
                 TbI.ContextMenu.Items.Insert(TbI.ContextMenu.Items.Count - 1, item);
-                //TbI.ContextMenu.Items.Add(item);
 
-                CreateVPNRow(entry.Name);
+                CreateVPNRow(entry.Name, entry.PhoneNumber);
             }
         }
 
@@ -237,65 +280,52 @@ namespace VPN_Switch
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            //UpdateGUI_Icons();
             foreach (VPN vpn in VpnList)
             {
-                vpn.Status = VPN_Controller.ConnectionStatus;
+                vpn.Status = VPN_Controller.CheckConnection(vpn.Name);
+                UpdateGUI_Icons(vpn);
             }
         }
 
         private void UpdateGUI_Icons(VPN vpn)
         {
-            //isConnected = VPN_Controller.CheckConnection(vpn.Name);
+            if (vpn.Status)
+            {
+                vpn.Image = (BitmapImage)Change_Entry_Icon(vpn.Image, vpn.Status);
+                //vpn.HostName = VPN_Controller.GetLocalIPAddress();
 
-            //List<NetworkInterface> interfaceList = new List<NetworkInterface>(VPN_Controller.Netinterfaces);
+                foreach (MenuItem entry in TbI.ContextMenu.Items)
+                {
+                    if ((string)entry.Header == vpn.Name)
+                    {
+                        entry.Icon = Change_Entry_Icon(entry, vpn.Status);
+                    }
+                }
+            }
+            else
+            {
+                vpn.Image = (BitmapImage)Change_Entry_Icon(vpn.Image, vpn.Status);
+                vpn.Status = VPN_Controller.CheckConnection(vpn.Name);
 
-            //if (isConnected)
-            //{
-            //    foreach (var connection in interfaceList)
-            //    {
-            //        foreach (VPN entryVpn in VpnList)
-            //        {
-            //            if (entryVpn.Name == connection.Name)
-            //            {
-            //                entryVpn.Image = (BitmapImage)Change_Entry_Icon(vpn.Image);
-            //                entryVpn.IP = VPN_Controller.GetLocalIPAddress();
-            //                entryVpn.Status = VPN_Controller.ConnectionStatus;
-            //            }
-            //        }
-            //        foreach (MenuItem entry in TbI.ContextMenu.Items)
-            //        {
-            //            if ((string)entry.Header == connection.Name)
-            //            {
-            //                entry.Icon = Change_Entry_Icon(entry);
-            //            }
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    foreach (VPN vpn in VpnList)
-            //    {
-            //        vpn.Image = (BitmapImage)Change_Entry_Icon(vpn.Image);
-            //        vpn.Status = VPN_Controller.ConnectionStatus;
-            //    }
-            //    foreach (MenuItem entry in TbI.ContextMenu.Items)
-            //    {
-            //        if ((string)entry.Header != "Exit" || (string)entry.Header != "Open Window")
-            //        {
-            //            entry.Icon = Change_Entry_Icon(entry);
-            //        }
-            //    }
-            //}
-            //RefreshDatagrid();
-            //dg_DataGrid.SelectedIndex = SelectedIndex;
+                foreach (MenuItem entry in TbI.ContextMenu.Items)
+                {
+                    if ((string)entry.Header != "Exit" || (string)entry.Header != "Open Window")
+                    {
+                        entry.Icon = Change_Entry_Icon(entry, vpn.Status);
+                    }
+                }
+            }
         }
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (((DataGrid)sender).SelectedIndex != -1)
+            if (((VPN)((DataGrid)sender).SelectedItem).Status)
             {
-                SelectedIndex = ((DataGrid)sender).SelectedIndex;
+                ButtonClickAction = "Disable";
+            }
+            else
+            {
+                ButtonClickAction = "Enable";
             }
         }
     }

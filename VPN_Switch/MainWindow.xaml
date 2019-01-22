@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:tb="http://www.hardcodet.net/taskbar"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+
         xmlns:utils="clr-namespace:VPN_Switch.Utils"
         xmlns:local="clr-namespace:VPN_Switch"
 
@@ -39,7 +39,7 @@
             <Button x:Name="btn_Exit" Content="Close and exit" HorizontalAlignment="Left" Margin="671,336,0,0" VerticalAlignment="Top" Width="83" Click="Exit_Clicked" />
 
             <TextBlock x:Name="txb_FooterMessage" HorizontalAlignment="Left" Margin="0,336,0,-2" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="24" Width="610" />
-            <xctk:SplitButton Margin="322,136,329,196" />
+
             <DataGrid x:Name="dg_DataGrid" CanUserAddRows="False" HorizontalAlignment="Left" Height="278" VerticalAlignment="Top" Width="764" Margin="0,53,0,0" ItemsSource="{Binding VpnList, Mode=OneWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" SelectionChanged="DataGrid_SelectionChanged">
                 <DataGrid.ItemContainerStyle>
                     <Style TargetType="{x:Type DataGridRow}">
@@ -57,6 +57,7 @@
                     </DataGridTemplateColumn>
 
                     <DataGridTextColumn Header="Status" Width="120" Binding="{Binding Path=Status}" IsReadOnly="True" />
+                    <DataGridTextColumn Header="Hostname" Width="120" Binding="{Binding Path=HostName}" IsReadOnly="True" />
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -64,7 +65,7 @@
                 <ToolBar Margin="0,0,-19,0">
                     <Menu Width="739">
                         <MenuItem Header="File">
-                            <MenuItem Header="{Binding ButtonClickAction}" />
+                            <MenuItem Header="{Binding Path=ButtonClickAction}" />
                             <MenuItem Header="Reconnect" Foreground="#FF999999" />
                             <MenuItem Header="Status" Foreground="#FF999999" />
                             <Separator />

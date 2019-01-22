@@ -9,7 +9,6 @@ namespace VPN_Switch
 {
     public static class VPN_Controller
     {
-        public static string ConnectionStatus { get; set; }
         public static string CurrentIP { get; set; }
         public static IList<NetworkInterface> Netinterfaces { get; set; }
 
@@ -24,8 +23,6 @@ namespace VPN_Switch
                 Netinterfaces.Clear();
             }
 
-            ConnectionStatus = "";
-
             if (NetworkInterface.GetIsNetworkAvailable())
             {
                 NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
@@ -34,11 +31,9 @@ namespace VPN_Switch
                 {
                     if (Interface.OperationalStatus == OperationalStatus.Up)
                     {
-                        if ((Interface.NetworkInterfaceType == NetworkInterfaceType.Ppp) && (Interface.NetworkInterfaceType != NetworkInterfaceType.Loopback))
+                        if ((Interface.NetworkInterfaceType == NetworkInterfaceType.Ppp) && (Interface.NetworkInterfaceType != NetworkInterfaceType.Loopback) && Interface.Name == vpnName)
                         {
                             Netinterfaces.Add(Interface);
-                            ConnectionStatus += "Connected";
-                            CurrentIP = GetLocalIPAddress();
                         }
                     }
                 }
@@ -48,8 +43,6 @@ namespace VPN_Switch
                 }
             }
 
-            ConnectionStatus = "disconnected";
-            CurrentIP = GetLocalIPAddress();
             return false;
         }
 
@@ -60,29 +53,6 @@ namespace VPN_Switch
             MainWindow.rasdial.WaitForExit();
 
             //CheckConnection();
-
-            //https://vpn.hhmaskin.no:4433
-        }
-
-        public static string GetLocalIPAddress()
-        {
-            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
-            string message = "";
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    message += ip.ToString() + "\n";
-                }
-            }
-            if (!string.IsNullOrEmpty(message))
-            {
-                return message;
-            }
-            else
-            {
-                throw new Exception("No network adapters with an IPv4 address in the system!");
-            }
         }
 
         public static void OpenConnection(string vpnName, string username, string password)
@@ -105,13 +75,18 @@ namespace VPN_Switch
                 dialog.SetDialogMessage();
                 dialog.Show();
             }
+            else if (exitcode == -2147020568)
+            {
+                MessageBox.Show(exitcode + ": " + error + "\n Already connected to this host.");
+            }
             else if (exitcode != 0)
             {
                 MessageBox.Show(exitcode + ": " + error);
             }
+            
             else
             {
-                CheckConnection();
+                CheckConnection(vpnName);
             }
         }
     }
